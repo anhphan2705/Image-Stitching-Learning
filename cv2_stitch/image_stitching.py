@@ -12,6 +12,7 @@ print("[Loading Images]")
 for image_path in image_paths:
     image = cv2.imread(image_path)
     images.append(image)
+print(f"[Loaded {len(images)} image(s)]")
 
 # Stitching
 print("[Stitching Images]")
@@ -22,7 +23,7 @@ stitcher = cv2.Stitcher_create()
 if status == 0:
     print("[Stitch successfully]")
     cv2.imshow("hello", stitched_img)
-    cv2.imwrite("./output/stitched.jpg", stitched_img)
+    #cv2.imwrite("./output/stitched.jpg", stitched_img)
     cv2.waitKey()
 else:
     print("[Something went wrong]")
