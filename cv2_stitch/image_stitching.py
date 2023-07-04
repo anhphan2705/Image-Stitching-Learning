@@ -1,10 +1,9 @@
 import cv2
-import numpy as np
 import glob
 
 # Get image paths and create a image list
 print("[Accessing folder]")
-image_paths = glob.glob("./images/cow/*.jpg")
+image_paths = glob.glob("./images/real/*.jpg")
 images = []
 
 print(image_paths)
@@ -23,7 +22,7 @@ stitcher = cv2.Stitcher_create()
 if status == 0:
     print("[Stitch successfully]")
     cv2.imshow("hello", stitched_img)
-    cv2.imwrite("./output/stitched_cow.jpg", stitched_img)
+    cv2.imwrite("./output/stitched.jpg", stitched_img)
     cv2.waitKey()
 else:
     print("[Something went wrong]")
