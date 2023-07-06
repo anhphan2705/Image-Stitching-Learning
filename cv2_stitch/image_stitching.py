@@ -1,8 +1,5 @@
 import cv2
 import glob
-import numpy as np
-import imutils
-
 
 def show_image(header, image):
     print("[CONSOLE] Showing image")
@@ -54,6 +51,15 @@ def get_threshold_image(gray_image):
 def get_image_2D_dim(image):
     return image.shape[:2]
 
+def get_mask_image(image):
+    print("[CONSOLE] Masking image")
+    gray_image = get_gray_image(image)
+    # Threshold + Blur + Threshold = Remove all the random black pixel in the white part of the first threshold
+    threshold_image = get_threshold_image(gray_image)
+    threshold_image_b = cv2.GaussianBlur(threshold_image, (5, 5), 0)
+    threshold_image = get_threshold_image(threshold_image_b)
+    return threshold_image
+
 def crop_image(image, factor):
     (h, w) = get_image_2D_dim(image)
     # Crop horizontally (width)
@@ -68,44 +74,55 @@ def crop_image(image, factor):
 
 def is_black_pixel_outline(threshold_image):
     # Find if there is black pixel on 4 sides
+    print("Step 1")
     (height, width) = get_image_2D_dim(threshold_image)
     # Lower side (0, w)
     for w in range(0, width):
         if all(threshold_image[0, w] == [0, 0]):
-            print(0, w)
             return True
     # Upper side (h, w)
+    print("Step 2")
     for w in range(0, width):
         if all(threshold_image[height-1, w] == [0, 0]):
-            print(height-1, w)
             return True
     # Left side (h, 0)
+    print("Step 3")
     for h in range(0, height):
-        if all(threshold_image[h, 0] == [0, 0, 0]):
-            print(h, 0)
+        if all(threshold_image[h, 0] == [0, 0]):
             return True
     # Right side (h, w)
+    print("Step 4")
     for h in range(0, height):
-        if all(threshold_image[h, width-1] == [0, 0, 0]):
-            print(h, width-1)
+        if all(threshold_image[h, width-1] == [0, 0]):
+            return True
+    print("Step 5")
     return False
+    
+def remove_black_outline(image):
+    print("[CONSOLE] Cropping Image")
+    mask = get_mask_image(image)
+    is_cropped = False
+    for crop_factor in range(100, -1, -1):
+        crop_factor = 0.01 * crop_factor
+        print(crop_factor)
+        trial_mask = crop_image(mask, crop_factor)
+        if not is_black_pixel_outline(trial_mask):
+            is_cropped = True
+            print("Cropped")
+            break
+    if is_cropped:
+        print("[CONSOLE] Crop successfully")
+        return crop_image(image, crop_factor)
+    else:
+        print("[CONSOLE] Image is not suitable to be cropped")
+        return None
     
 images = get_images("./images/real/*.jpg")
 stitched_image = get_stitch_image(images)
-gray_stitched_image = get_gray_image(stitched_image)
-threshold_image = get_threshold_image(gray_stitched_image)
-threshold_image_b = cv2.GaussianBlur(threshold_image, (3, 3), 0)
-threshold_image = get_threshold_image(threshold_image_b)
+cropped_image = remove_black_outline(stitched_image)
 
-# Cropping
-print("[CONSOLE] Cropping Image")
-threshold_image = crop_image(threshold_image, 0.815)
-if is_black_pixel_outline(threshold_image):
-    print("still black")
-else:
-    print("ya good")
+show_image("Product", cropped_image)
+write_image("./output/stitched_img.jpg", stitched_image)
+write_image("./output/cropped_img.jpg", cropped_image)
 
-    
-show_image("hello", threshold_image)
-write_image("./output/test_img.jpg", threshold_image)
 
