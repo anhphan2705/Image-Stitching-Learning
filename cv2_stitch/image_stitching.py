@@ -74,42 +74,40 @@ def crop_image(image, factor):
 
 def is_black_pixel_outline(threshold_image):
     # Find if there is black pixel on 4 sides
-    print("Step 1")
     (height, width) = get_image_2D_dim(threshold_image)
     # Lower side (0, w)
     for w in range(0, width):
         if all(threshold_image[0, w] == [0, 0]):
             return True
     # Upper side (h, w)
-    print("Step 2")
     for w in range(0, width):
         if all(threshold_image[height-1, w] == [0, 0]):
             return True
     # Left side (h, 0)
-    print("Step 3")
     for h in range(0, height):
         if all(threshold_image[h, 0] == [0, 0]):
             return True
     # Right side (h, w)
-    print("Step 4")
     for h in range(0, height):
         if all(threshold_image[h, width-1] == [0, 0]):
             return True
-    print("Step 5")
     return False
     
 def remove_black_outline(image):
     print("[CONSOLE] Cropping Image")
     mask = get_mask_image(image)
+    # Cropping image
     is_cropped = False
     for crop_factor in range(100, -1, -1):
         crop_factor = 0.01 * crop_factor
-        print(crop_factor)
         trial_mask = crop_image(mask, crop_factor)
         if not is_black_pixel_outline(trial_mask):
             is_cropped = True
             print("Cropped")
             break
+    # Salvage usuable cropped portion
+    
+    # Showing result
     if is_cropped:
         print("[CONSOLE] Crop successfully")
         return crop_image(image, crop_factor)
