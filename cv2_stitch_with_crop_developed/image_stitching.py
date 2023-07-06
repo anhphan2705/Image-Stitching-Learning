@@ -30,8 +30,10 @@ def get_gray_image(image):
 
 def get_stitch_image(image_list):
     print("[CONSOLE] Stitching Images")
+    # Stitch
     stitcher = cv2.Stitcher.create()
     stitch_status, stitched_image = stitcher.stitch(image_list)
+    # Output
     if stitch_status == 0:
         print("[CONSOLE] Stitch successfully")
         return stitched_image
@@ -41,12 +43,6 @@ def get_stitch_image(image_list):
 def get_threshold_image(gray_image):
     print("[CONSOLE] Thresholding image")
     return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY)[1]
-
-# def get_countour_dim(gray_image):
-#     contours = cv2.findContours(gray_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-#     contours = imutils.grab_contours(contours)
-#     max_contours = max(contours, key=cv2.contourArea)
-#     return cv2.boundingRect(max_contours)
 
 def get_image_2D_dim(image):
     return image.shape[:2]
@@ -114,11 +110,12 @@ def remove_black_outline(image):
     else:
         print("[CONSOLE] Image is not suitable to be cropped")
         return None
-    
+
+# Main
 images = get_images("./images/real/*.jpg")
 stitched_image = get_stitch_image(images)
 cropped_image = remove_black_outline(stitched_image)
-
+# Output
 show_image("Product", cropped_image)
 write_image("./output/stitched_img.jpg", stitched_image)
 write_image("./output/cropped_img.jpg", cropped_image)
