@@ -66,7 +66,14 @@ def crop_image(image, factor):
     amount_crop = h * (1-factor)
     h_upper = int(h - amount_crop//2)
     h_lower = int(amount_crop//2)
-    return image[h_lower:h_upper, w_lower:w_upper]
+    return (h_lower, h_upper, w_lower, w_upper), image[h_lower:h_upper, w_lower:w_upper]
+
+def expand_from_crop_image(image, crop_location):
+    # Assuming it is proportionally cropped, expand each side until it hit a black pixel
+    # This will get the most image info in the expense of original image ratio
+    h_lower, h_upper, w_lower, w_upper = crop_location
+    
+    return None
 
 def is_black_pixel_outline(threshold_image):
     # Find if there is black pixel on 4 sides
@@ -96,13 +103,13 @@ def remove_black_outline(image):
     is_cropped = False
     for crop_factor in range(100, -1, -1):
         crop_factor = 0.01 * crop_factor
-        trial_mask = crop_image(mask, crop_factor)
+        trial_mask = crop_image(mask, crop_factor)[1]
         if not is_black_pixel_outline(trial_mask):
             is_cropped = True
             print("Cropped")
             break
     # Salvage usuable cropped portion
-    
+    print(crop_factor)
     # Showing result
     if is_cropped:
         print("[CONSOLE] Crop successfully")
@@ -114,7 +121,7 @@ def remove_black_outline(image):
 # Main
 images = get_images("./images/real/*.jpg")
 stitched_image = get_stitch_image(images)
-cropped_image = remove_black_outline(stitched_image)
+crop_location, cropped_image = remove_black_outline(stitched_image)
 # Output
 show_image("Product", cropped_image)
 write_image("./output/stitched_img.jpg", stitched_image)
